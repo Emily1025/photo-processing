@@ -1,0 +1,642 @@
+unit Unit1;
+
+interface
+
+uses
+  Windows, Messages, SysUtils, Variants, Classes, Graphics, Controls, Forms,
+  Dialogs,jpeg, Menus, ExtCtrls,math;
+
+type
+  TForm1 = class(TForm)
+    ScrollBox1: TScrollBox;
+    Image1: TImage;
+    MainMenu1: TMainMenu;
+    OpenDialog1: TOpenDialog;
+    SaveDialog1: TSaveDialog;
+    N1: TMenuItem;
+    N2: TMenuItem;
+    N3: TMenuItem;
+    N4: TMenuItem;
+    N6: TMenuItem;
+    N7: TMenuItem;
+    N8: TMenuItem;
+    N9: TMenuItem;
+    N10: TMenuItem;
+    N11: TMenuItem;
+    N12: TMenuItem;
+    N5: TMenuItem;
+    N13: TMenuItem;
+    N14: TMenuItem;
+    N15: TMenuItem;
+    N16: TMenuItem;
+    N17: TMenuItem;
+    N18: TMenuItem;
+    N19: TMenuItem;
+    N20: TMenuItem;
+    N21: TMenuItem;
+    Sobel1: TMenuItem;
+    Laplacian1: TMenuItem;
+    Kirsch1: TMenuItem;
+    N22: TMenuItem;
+    N23: TMenuItem;
+    N24: TMenuItem;
+    N25: TMenuItem;
+    N26: TMenuItem;
+    N27: TMenuItem;
+    N28: TMenuItem;
+    N29: TMenuItem;
+    N30: TMenuItem;
+    N31: TMenuItem;
+    N32: TMenuItem;
+    procedure N2Click(Sender: TObject);
+    procedure N4Click(Sender: TObject);
+    procedure N5Click(Sender: TObject);
+    procedure N6Click(Sender: TObject);
+    procedure N7Click(Sender: TObject);
+    procedure N8Click(Sender: TObject);
+    procedure N9Click(Sender: TObject);
+    procedure N10Click(Sender: TObject);
+    procedure N11Click(Sender: TObject);
+    function cp(n:integer):integer;
+    procedure N12Click(Sender: TObject);
+    procedure N13Click(Sender: TObject);
+    procedure N15Click(Sender: TObject);
+    procedure N16Click(Sender: TObject);
+    procedure N17Click(Sender: TObject);
+    procedure N19Click(Sender: TObject);
+    procedure N21Click(Sender: TObject);
+    procedure Sobel1Click(Sender: TObject);
+    procedure Laplacian1Click(Sender: TObject);
+    procedure Kirsch1Click(Sender: TObject);
+    function kir(a0,a1,a2,a3,a4,a5,a6,a7:integer):integer;
+    procedure N23Click(Sender: TObject);
+    procedure N25Click(Sender: TObject);
+    procedure N26Click(Sender: TObject);
+    procedure N27Click(Sender: TObject);
+    procedure N28Click(Sender: TObject);
+    procedure xingtai(n:integer);
+    procedure N30Click(Sender: TObject);
+    procedure Image1MouseDown(Sender: TObject; Button: TMouseButton;
+      Shift: TShiftState; X, Y: Integer);
+    procedure N32Click(Sender: TObject);
+  
+  private
+    { Private declarations }
+  public
+    { Public declarations }
+  end;
+
+var
+  Form1: TForm1;
+
+implementation
+uses
+Unit2,Unit3,Unit4,Unit5, Unit6, Unit7, Unit8, Unit9;
+var
+bitmap2:Tbitmap;
+
+{$R *.dfm}
+
+procedure TForm1.N2Click(Sender: TObject);
+var
+ filename:string;
+begin
+   with openDialog1 do
+   if execute then
+   begin
+   filename:=openDialog1.FileName;
+   image1.Picture.LoadFromFile(filename);
+   bitmap1.Free ;
+   bitmap1:=Tbitmap.Create ;
+   bitmap1.Width:=image1.Width ;
+   bitmap1.Height :=image1.Height ;
+   bitmap1.PixelFormat:=pf24bit;
+   bitmap1.Canvas.Draw(0,0,image1.Picture.Graphic);
+   form6.image1.Picture.Assign(bitmap1);
+   end;
+end;
+
+
+
+procedure TForm1.N4Click(Sender: TObject);
+var
+  i,j:integer;
+  p:pByteArray;
+begin
+   for j:=0 to bitmap1.Height -1 do
+   begin
+   p:=bitmap1.ScanLine [j];
+   for i:=0 to bitmap1.Width -1 do
+   begin
+   p[i*3]:=not p[i*3];
+   p[i*3+1]:=not p[i*3+1];
+   p[i*3+2]:=not p[i*3+2];
+   end;
+   end;
+   image1.Picture.Assign(bitmap1);
+end;
+
+procedure TForm1.N5Click(Sender: TObject);
+var
+  jp:TJPEGImage;
+begin
+  jp:=TJPEGImage.Create ;
+  try
+  with jp do
+  begin
+  jp.CompressionQuality :=80;
+  jp.Compress ;
+  assign(image1.picture.bitmap);
+  savedialog1.defaultext:='JPG';
+  savedialog1.filter:='JPG文件(*.jpg)|*.jpg';
+  if savedialog1.execute then
+   saveToFile(savedialog1.filename);
+   end;
+   finally
+   jp.Free ;
+end;
+  end;
+  
+function TForm1.cp(n:integer):integer;
+begin
+result:=n;
+if n>255 then result:=255;
+if n<0 then result:=0;
+end;
+procedure TForm1.N6Click(Sender: TObject);  //碧绿效果
+var
+  i,j:integer;
+  p:pByteArray;
+  r,g,b:integer;
+begin
+    bitmap2.Free ;
+   bitmap2:=Tbitmap.Create ;
+   bitmap2.Width:=bitmap1.Width ;
+   bitmap2.Height :=bitmap1.Height ;
+   bitmap2.PixelFormat:=pf24bit;
+   bitmap2.Assign(bitmap1);
+   for j:=0 to bitmap2.Height -1 do
+   begin
+     p:=bitmap2.ScanLine [j];
+     for i:=0 to bitmap2.Width -1 do
+     begin
+      b:=p[i*3];
+      g:=p[i*3+1];
+      r:=p[i*3+2];
+      p[i*3+2]:=cp(sqr(g-b) div 128);
+      p[i*3+1]:=cp(sqr(r-b) div 128);
+      p[i*3]:=cp(sqr(r-g) div 128);
+      end;
+   end;
+   image1.Picture.Assign(bitmap2);
+end;
+
+procedure TForm1.N7Click(Sender: TObject);   //棕褐效果
+var
+  i,j:integer;
+  p:pByteArray;
+  r,g,b:integer;
+begin
+    bitmap2.Free ;
+    bitmap2:=Tbitmap.Create ;
+    bitmap2.Width:=bitmap1.Width ;
+    bitmap2.Height :=bitmap1.Height ;
+    bitmap2.PixelFormat:=pf24bit;
+    bitmap2.Assign(bitmap1);
+   for j:=0 to bitmap2.Height -1 do
+   begin
+     p:=bitmap2.ScanLine [j];
+     for i:=0 to bitmap2.Width -1 do
+     begin
+      b:=p[i*3];
+      g:=p[i*3+1];
+      r:=p[i*3+2];
+      p[i*3+2]:=cp(floor(0.393*r+0.769*g+0.189*b));
+      p[i*3+1]:=cp(floor(0.349*r+0.686*g+0.168*b));
+      p[i*3]:=cp(floor(0.272*r+0.534*g+0.131*b));
+      end;
+   end;
+   image1.Picture.Assign(bitmap2);
+end;
+
+procedure TForm1.N8Click(Sender: TObject); //冰冻效果
+var
+  i,j:integer;
+  p:pByteArray;
+  r,g,b:integer;
+begin
+    bitmap2.Free ;
+    bitmap2:=Tbitmap.Create ;
+    bitmap2.Width:=bitmap1.Width ;
+    bitmap2.Height :=bitmap1.Height ;
+    bitmap2.PixelFormat:=pf24bit;
+    bitmap2.Assign(bitmap1);
+   for j:=0 to bitmap2.Height -1 do
+    begin
+    p:=bitmap2.ScanLine [j];
+    for i:=0 to bitmap2.Width -1 do
+     begin
+      b:=p[i*3];
+      g:=p[i*3+1];
+      r:=p[i*3+2];
+      p[i*3+2]:=cp(abs(r-g-b)*3 div 2);
+      p[i*3+1]:=cp(abs(g-b-r)*3 div 2);
+      p[i*3]:=cp(abs(b-r-g)*3 div 2);
+     end;
+   end;
+   image1.Picture.Assign(bitmap2);
+  end;
+
+
+procedure TForm1.N9Click(Sender: TObject); //熔铸效果
+var
+  i,j:integer;
+  p:pByteArray;
+  r,g,b:integer;
+begin
+    bitmap2.Free ;
+    bitmap2:=Tbitmap.Create ;
+    bitmap2.Width:=bitmap1.Width ;
+    bitmap2.Height :=bitmap1.Height ;
+    bitmap2.PixelFormat:=pf24bit;
+    bitmap2.Assign(bitmap1);
+   for j:=0 to bitmap2.Height -1 do
+    begin
+    p:=bitmap2.ScanLine [j];
+    for i:=0 to bitmap2.Width -1 do
+     begin
+      b:=p[i*3];
+      g:=p[i*3+1];
+      r:=p[i*3+2];
+      p[i*3+2]:=cp(r*128 div(g+b+1));
+      p[i*3+1]:=cp(g*128 div(r+b+1));
+     p[i*3]:=cp(b*128 div(g+r+1));
+     end;
+   end;
+   image1.Picture.Assign(bitmap2);
+end;
+
+procedure TForm1.N10Click(Sender: TObject);  //暗调效果
+var
+  i,j:integer;
+  p:pByteArray;
+  r,g,b:integer;
+begin
+    bitmap2.Free ;
+    bitmap2:=Tbitmap.Create ;
+    bitmap2.Width:=bitmap1.Width ;
+    bitmap2.Height :=bitmap1.Height ;
+    bitmap2.PixelFormat:=pf24bit;
+    bitmap2.Assign(bitmap1);
+   for j:=0 to bitmap2.Height -1 do
+     begin
+     p:=bitmap2.ScanLine [j];
+      for i:=0 to bitmap2.Width -1 do
+       begin
+        b:=p[i*3];
+        g:=p[i*3+1];
+        r:=p[i*3+2];
+        p[i*3+2]:=cp(r*r div 255);
+        p[i*3+1]:=cp(g*g div 255);
+        p[i*3]:=cp(b*b div 255);
+       end;
+   end;
+   image1.Picture.Assign(bitmap2);
+end;
+
+procedure TForm1.N11Click(Sender: TObject); //对调效果
+var
+  i,j:integer;
+  p:pByteArray;
+  r,g,b:integer;
+begin
+   bitmap2.Free ;
+   bitmap2:=Tbitmap.Create ;
+   bitmap2.Width:=bitmap1.Width ;
+   bitmap2.Height :=bitmap1.Height ;
+   bitmap2.PixelFormat:=pf24bit;
+   bitmap2.Assign(bitmap1);
+   for j:=0 to bitmap2.Height -1 do
+   begin
+   p:=bitmap2.ScanLine [j];
+   for i:=0 to bitmap2.Width -1 do
+   begin
+    b:=p[i*3];
+    g:=p[i*3+1];
+    r:=p[i*3+2];
+    p[i*3+2]:=cp(g*b div 255);
+    p[i*3+1]:=cp(b*r div 255);
+    p[i*3]:=cp(r*g div 255);
+    end;
+   end;
+   image1.Picture.Assign(bitmap2);
+end;
+
+procedure TForm1.N12Click(Sender: TObject); //黑白照效果
+var
+  i,j:integer;
+  p:pByteArray;
+  r,g,b:integer;
+  gray:integer;
+begin
+   bitmap2.Free ;
+   bitmap2:=Tbitmap.Create ;
+   bitmap2.Width:=bitmap1.Width ;
+   bitmap2.Height :=bitmap1.Height ;
+   bitmap2.PixelFormat:=pf24bit;
+   bitmap2.Assign(bitmap1);
+   for j:=0 to bitmap2.Height -1 do
+   begin
+   p:=bitmap2.ScanLine [j];
+   for i:=0 to bitmap2.Width -1 do
+   begin
+    b:=p[i*3];
+    g:=p[i*3+1];
+    r:=p[i*3+2];
+    gray:=floor(0.3*r+0.59*g+0.11*b);
+    if gray>=128 then
+     begin
+      p[i*3+2]:=255;
+      p[i*3+1]:=255;
+      p[i*3]:=255;
+      end
+      else
+      begin
+       p[i*3+2]:=0;
+      p[i*3+1]:=0;
+      p[i*3]:=0;
+      end;
+    end;
+   end;
+   image1.Picture.Assign(bitmap2);
+end;
+procedure TForm1.N13Click(Sender: TObject);
+begin
+    Form2.show;
+end;
+
+
+procedure TForm1.N15Click(Sender: TObject); //灰度变换
+begin
+  Form4.Show;
+end;
+
+procedure TForm1.N16Click(Sender: TObject); //几何变换
+begin
+  Form5.Show;
+end;
+
+procedure TForm1.N17Click(Sender: TObject); //代数运算
+begin
+  Form6.Show;
+end;
+
+procedure TForm1.N19Click(Sender: TObject); //平滑滤波
+begin
+  Form7.Show;
+end;
+
+procedure TForm1.N21Click(Sender: TObject); //梯度算子
+var
+  i,j:integer;
+  p,p1,p2,p3:PByteArray;
+begin
+  bitmap2.free;
+  bitmap2:=Tbitmap.create;
+  bitmap2.width:=bitmap1.width;
+  bitmap2.height:=bitmap1.height;
+  bitmap2.pixelformat:=pf24bit;
+  for j:=1 to bitmap2.Height-2 do
+  begin
+    p:=bitmap2.ScanLine[j];
+    p1:=bitmap1.ScanLine[j-1];
+    p2:=bitmap1.ScanLine[j];
+    p3:=bitmap1.ScanLine[j+1];
+    for i:=1 to bitmap2.Width-2 do
+    begin
+      p[i*3+2]:=max(abs(p3[(i+1)*3+2]-p1[(i-1)*3+2]),
+                    abs(p1[(i+1)*3+2]-p3[(i-1)*3+2]));
+      p[i*3+1]:=max(abs(p3[(i+1)*3+1]-p1[(i-1)*3+1]),
+                    abs(p1[(i+1)*3+1]-p3[(i-1)*3+1]));
+      p[i*3+0]:=max(abs(p3[(i+1)*3+0]-p1[(i-1)*3+0]),
+                    abs(p1[(i+1)*3+0]-p3[(i-1)*3+0]));
+    end;
+  end;
+  image1.Picture.Assign(bitmap2);
+end;
+
+
+
+procedure TForm1.Sobel1Click(Sender: TObject);
+var
+  i,j:integer;
+  p,p1,p2,p3:PByteArray;
+begin
+  bitmap2.free;
+  bitmap2:=Tbitmap.create;
+  bitmap2.width:=bitmap1.width;
+  bitmap2.height:=bitmap1.height;
+  bitmap2.pixelformat:=pf24bit;
+  for j:=1 to bitmap2.Height-2 do
+  begin
+    p:=bitmap2.ScanLine[j];
+    p1:=bitmap1.ScanLine[j-1];
+    p2:=bitmap1.ScanLine[j];
+    p3:=bitmap1.ScanLine[j+1];
+    for i:=1 to bitmap2.Width-2 do
+    begin
+      p[i*3+2]:=cp(abs(p1[(i-1)*3+2]+2*p1[i*3+2]+p1[(i+1)*3+2]
+                -p3[(i-1)*3+2]-2*p3[i*3+2]-p3[(i+1)*3+2]));
+      p[i*3+1]:=cp(abs(p1[(i-1)*3+1]+2*p1[i*3+1]+p1[(i+1)*3+1]
+                -p3[(i-1)*3+1]-2*p3[i*3+1]-p3[(i+1)*3+1]));
+      p[i*3+0]:=cp(abs(p1[(i-1)*3+0]+2*p1[i*3+0]+p1[(i+1)*3+0]
+                -p3[(i-1)*3+0]-2*p3[i*3+0]-p3[(i+1)*3+0]));
+    end;
+  end;
+  image1.Picture.Assign(bitmap2);
+end;
+
+
+procedure TForm1.Laplacian1Click(Sender: TObject);
+var
+  i,j:integer;
+  p,p1,p2,p3:PByteArray;
+begin
+  bitmap2.free;
+  bitmap2:=Tbitmap.create;
+  bitmap2.width:=bitmap1.width;
+  bitmap2.height:=bitmap1.height;
+  bitmap2.pixelformat:=pf24bit;
+  for j:=1 to bitmap2.Height-2 do
+  begin
+    p:=bitmap2.ScanLine[j];
+    p1:=bitmap1.ScanLine[j-1];
+    p2:=bitmap1.ScanLine[j];
+    p3:=bitmap1.ScanLine[j+1];
+    for i:=1 to bitmap2.Width-2 do
+    begin
+      p[i*3+2]:=cp(4*p2[i*3+2]-p2[(i-1)*3+2]-p2[(i+1)*3+2]-p1[i*3+2]-p3[i*3+2]);
+      p[i*3+1]:=cp(4*p2[i*3+1]-p2[(i-1)*3+1]-p2[(i+1)*3+1]-p1[i*3+1]-p3[i*3+1]);
+      p[i*3+0]:=cp(4*p2[i*3+0]-p2[(i-1)*3+0]-p2[(i+1)*3+0]-p1[i*3+0]-p3[i*3+0]);
+    end;
+  end;
+  image1.Picture.Assign(bitmap2);
+end;
+function TForm1.kir(a0,a1,a2,a3,a4,a5,a6,a7:integer):integer;
+var
+  a:Array[0..7] of integer;
+  i:integer;
+  max:integer;
+begin
+  a[0]:=5*(a0+a1+a2)-3*(a3+a4+a5+a6+a7);
+  a[1]:=5*(a3+a1+a2)-3*(a0+a4+a5+a6+a7);
+  a[2]:=5*(a2+a3+a4)-3*(a5+a6+a7+a0+a1);
+  a[3]:=5*(a3+a4+a5)-3*(a6+a7+a0+a1+a2);
+  a[4]:=5*(a4+a5+a6)-3*(a7+a1+a2+a3+a0);
+  a[5]:=5*(a5+a6+a7)-3*(a0+a1+a2+a3+a4);
+  a[6]:=5*(a0+a6+a7)-3*(a5+a1+a2+a3+a4);
+  a[7]:=5*(a0+a1+a7)-3*(a5+a6+a2+a3+a4);
+  max:=1;
+  for i:=0 to 7 do
+  begin
+   if  max<a[i] then max:=a[i];
+  end;
+  result:=max;
+end;
+
+
+procedure TForm1.Kirsch1Click(Sender: TObject);
+var
+  i,j:integer;
+  p,p1,p2,p3:PByteArray;
+begin
+  bitmap2.free;
+  bitmap2:=Tbitmap.create;
+  bitmap2.width:=bitmap1.width;
+  bitmap2.height:=bitmap1.height;
+  bitmap2.pixelformat:=pf24bit;
+  for j:=1 to bitmap2.Height-2 do
+  begin
+    p:=bitmap2.ScanLine[j];
+    p1:=bitmap1.ScanLine[j-1];
+    p2:=bitmap1.ScanLine[j];
+    p3:=bitmap1.ScanLine[j+1];
+    for i:=1 to bitmap2.Width-2 do
+    begin
+      p[i*3+2]:=cp(kir(p1[(i-1)*3+2],p1[i*3+2],p1[(i+1)*3+2],
+                   p2[(i+1)*3+2],p3[(i+1)*3+2],p3[i*3+2],
+                   p3[(i-1)*3+2],p2[(i-1)*3+2]));
+      p[i*3+1]:=cp(kir(p1[(i-1)*3+1],p1[i*3+1],p1[(i+1)*3+1],
+                   p2[(i+1)*3+1],p3[(i+1)*3+1],p3[i*3+1],
+                   p3[(i-1)*3+1],p2[(i-1)*3+1]));
+      p[i*3+0]:=cp(kir(p1[(i-1)*3+0],p1[i*3+0],p1[(i+1)*3+0],
+                   p2[(i+1)*3+0],p3[(i+1)*3+0],p3[i*3+0],
+                   p3[(i-1)*3+0],p2[(i-1)*3+0]));
+    end;
+  end;
+  image1.Picture.Assign(bitmap2);
+end;
+
+
+procedure TForm1.N23Click(Sender: TObject);
+begin
+  Form8.Show;
+end;
+procedure TForm1.xingtai(n:integer);
+var
+i,j:integer;
+p,p0,p1,p2:PByteArray;
+gray:integer;
+begin
+ bitmap2.Free;
+ bitmap2:=TBitmap.Create;
+ bitmap2.Width:=bitmap1.Width;
+ bitmap2.Height:=bitmap1.Height;
+ bitmap2.PixelFormat:=pf24bit;
+
+ for j:=1 to bitmap2.Height-2 do
+ begin
+  p:=bitmap2.ScanLine[j];
+  p0:=bitmap1.ScanLine[j-1];
+  p1:=bitmap1.ScanLine[j];
+  p2:=bitmap1.ScanLine[j+1];
+  for i:=1 to bitmap2.Width-2 do
+  begin
+   gray:=p0[(i-1)*3]+p0[i*3]+p0[(i+1)*3]
+         +p1[(i-1)*3]+p1[i*3]+p1[(i+1)*3]
+         +p2[(i-1)*3]+p2[i*3]+p2[(i+1)*3];
+   if gray>255*n then
+   begin
+    p[i*3+2]:=255;
+    p[i*3+1]:=255;
+    p[i*3]:=255;
+   end
+   else
+   begin
+    p[i*3+2]:=0;
+    p[i*3+1]:=0;
+    p[i*3]:=0;
+   end;
+  end;//i
+ end;//j
+ image1.Picture.Assign(bitmap2);
+end;
+
+
+procedure TForm1.N25Click(Sender: TObject);
+begin
+  xingtai(1);
+end;
+
+procedure TForm1.N26Click(Sender: TObject);
+begin
+  xingtai(8);
+end;
+
+procedure TForm1.N27Click(Sender: TObject);
+begin
+  xingtai(8);
+  bitmap1.Assign(bitmap2);
+  xingtai(1);
+
+end;
+
+procedure TForm1.N28Click(Sender: TObject);
+begin
+  xingtai(1);
+  bitmap1.Assign(bitmap2);
+  xingtai(8);
+
+end;
+
+procedure TForm1.N30Click(Sender: TObject);
+begin
+  image1.Picture.Assign(bitmap1);
+end;
+
+procedure TForm1.Image1MouseDown(Sender: TObject; Button: TMouseButton;
+  Shift: TShiftState; X, Y: Integer);
+var
+     p:PByteArray;
+     r,g,b:integer;
+begin
+
+        p:=bitmap1.ScanLine[y];
+        r:=p[x*3+2];
+        g:=p[x*3+1];
+        b:=p[x*3];
+        Form9.Edit1.Text:=inttostr(r);
+        Form9.Edit2.Text:=inttostr(g);
+        Form9.Edit3.Text:=inttostr(b);
+        Form9.Label1.Color:=RGB(r,g,b);
+
+
+end;
+
+
+procedure TForm1.N32Click(Sender: TObject);
+begin
+  Form9.Show;
+end;
+
+end.
